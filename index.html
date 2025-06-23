@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Study Buddy - Your Personal Learning Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="text-white">
+    <div id="main-container" class="container mx-auto px-4 py-8">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">AI Study Buddy</h1>
+            <p class="text-xl mb-8">Your personalized learning journey starts here</p>
+            <button onclick="startOnboarding()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition duration-300 text-lg">
+                Begin Your Journey
+            </button>
+        </div>
+
+        <!-- Onboarding Form -->
+        <div id="onboarding-form" class="hidden max-w-md mx-auto glass-effect rounded-xl p-6">
+            <div id="step1" class="question-step">
+                <h2 class="text-2xl font-bold mb-4">What's your name?</h2>
+                <input type="text" id="userName" class="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white mb-4" placeholder="Enter your name">
+                <button onclick="nextStep(1)" class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-lg">Next</button>
+            </div>
+
+            <div id="step2" class="question-step hidden">
+                <h2 class="text-2xl font-bold mb-4">What are your interests?</h2>
+                <div class="space-y-2">
+                    <label class="block">
+                        <input type="checkbox" class="mr-2" value="programming"> Programming
+                    </label>
+                    <label class="block">
+                        <input type="checkbox" class="mr-2" value="design"> Design
+                    </label>
+                    <label class="block">
+                        <input type="checkbox" class="mr-2" value="business"> Business
+                    </label>
+                    <label class="block">
+                        <input type="checkbox" class="mr-2" value="science"> Science
+                    </label>
+                </div>
+                <button onclick="nextStep(2)" class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-lg mt-4">Next</button>
+            </div>
+
+            <div id="step3" class="question-step hidden">
+                <h2 class="text-2xl font-bold mb-4">Current skill level?</h2>
+                <select id="skillLevel" class="w-full p-3 rounded-lg bg-white/10 border border-white/20 text-white mb-4">
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                </select>
+                <button onclick="generateLearningPath()" class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-lg">Generate Learning Path</button>
+            </div>
+        </div>
+
+        <!-- Learning Dashboard -->
+        <div id="learning-dashboard" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Course Content -->
+                <div class="glass-effect rounded-xl p-6">
+                    <h3 class="text-xl font-bold mb-4">Your Learning Path</h3>
+                    <div id="courseSuggestions" class="space-y-4">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- Progress Tracking -->
+                <div class="glass-effect rounded-xl p-6">
+                    <h3 class="text-xl font-bold mb-4">Progress Tracking</h3>
+                    <div id="progressStats" class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span>Course Completion</span>
+                            <span id="completionRate">0%</span>
+                        </div>
+                        <div class="w-full bg-white/10 rounded-full h-2.5">
+                            <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assessment Center -->
+                <div class="glass-effect rounded-xl p-6">
+                    <h3 class="text-xl font-bold mb-4">Assessments</h3>
+                    <div class="space-y-4">
+                        <button onclick="startAssessment('easy')" class="w-full bg-green-600 hover:bg-green-700 py-2 rounded-lg">Easy Test</button>
+                        <button onclick="startAssessment('intermediate')" class="w-full bg-yellow-600 hover:bg-yellow-700 py-2 rounded-lg">Intermediate Test</button>
+                        <button onclick="startAssessment('professional')" class="w-full bg-red-600 hover:bg-red-700 py-2 rounded-lg">Professional Test</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let userData = {
+            name: '',
+            interests: [],
+            skillLevel: '',
+            progress: 0
+        };
+
+        function startOnboarding() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('onboarding-form').classList.remove('hidden');
+        }
+
+        function nextStep(step) {
+            if (step === 1) {
+                userData.name = document.getElementById('userName').value;
+                if (!userData.name) {
+                    alert('Please enter your name');
+                    return;
+                }
+            } else if (step === 2) {
+                userData.interests = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+                if (userData.interests.length === 0) {
+                    alert('Please select at least one interest');
+                    return;
+                }
+            }
+
+            document.querySelector(`#step${step}`).classList.add('hidden');
+            document.querySelector(`#step${step + 1}`).classList.remove('hidden');
+        }
+
+        function generateLearningPath() {
+            userData.skillLevel = document.getElementById('skillLevel').value;
+            document.getElementById('onboarding-form').classList.add('hidden');
+            document.getElementById('learning-dashboard').classList.remove('hidden');
+
+            // Generate course suggestions based on interests and skill level
+            const courseSuggestions = document.getElementById('courseSuggestions');
+            userData.interests.forEach(interest => {
+                const courseElement = document.createElement('div');
+                courseElement.className = 'p-4 bg-white/5 rounded-lg';
+                courseElement.innerHTML = `
+                    <h4 class="font-bold">${interest.charAt(0).toUpperCase() + interest.slice(1)}</h4>
+                    <p class="text-sm text-gray-300">Customized ${userData.skillLevel} level course</p>
+                    <button onclick="startCourse('${interest}')" class="mt-2 text-blue-400 hover:text-blue-300">Start Learning</button>
+                `;
+                courseSuggestions.appendChild(courseElement);
+            });
+        }
+
+        function startCourse(course) {
+            // Simulate starting a course
+            alert(`Starting ${course} course. AI-generated content loading...`);
+            updateProgress(10);
+        }
+
+        function updateProgress(increment) {
+            userData.progress = Math.min(userData.progress + increment, 100);
+            document.getElementById('completionRate').textContent = `${userData.progress}%`;
+            document.getElementById('progressBar').style.width = `${userData.progress}%`;
+        }
+
+        function startAssessment(level) {
+            alert(`Starting ${level} level assessment. This would connect to an AI API to generate appropriate questions.`);
+            // In a real implementation, this would connect to an AI API to generate and grade assessments
+        }
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
